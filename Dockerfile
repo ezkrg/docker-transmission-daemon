@@ -1,9 +1,9 @@
-FROM alpine:3.6
+FROM alpine:3.8
 
 RUN apk add --no-cache --update \
 	transmission-daemon
 
-EXPOSE 9091 60198 60198/udp 5050
+EXPOSE 9091 60198 60198/udp
 
 USER transmission
 
