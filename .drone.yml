@@ -1,0 +1,50 @@
+---
+kind: pipeline
+type: docker
+name: transmission-daemon
+
+steps:
+  - name: tag
+    image: alpine:latest
+    commands:
+    - apk add --update --no-cache curl jq
+    - LATEST=$(curl -sL "https://api.github.com/repos/transmission/transmission/releases" | jq -r ".[0].tag_name")
+    - if curl -sfL https://hub.docker.com/v2/repositories/ezkrg/transmission-daemon/tags/$LATEST > /dev/null; then echo "tag $TAG already exist"; exit 78; fi
+    - echo -n "$LATEST" >> .latest
+    - TAG=$LATEST
+    - echo -n "latest,$TAG" > .tags
+    - while [ -z $${TAG##*\.*} ]; do echo -n "," >> ../.tags; TAG=$${TAG%*\.*}; echo -n $TAG >> ../.tags; done
+
+  - name: docker
+    image: docker:dind
+    privileged: true
+    detach: true
+    command: [ "dockerd", "--host=tcp://0.0.0.0:2375" ]
+
+  - name: publish
+    image: ezkrg/buildx:latest
+    environment:
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+    - while ! docker info; do sleep 1; done
+    - docker buildx create --use --name docker --node docker --platform linux/amd64 --driver docker-container $DOCKER_HOST
+    - echo $password | docker login --username $username --password-stdin
+    - apk add --update --no-cache bash
+    - TAGS=$(for TAG in $(cat .tags | sed -e 's/,/\ /g'); do echo -n "--tag ezkrg/transmission-daemon:$TAG "; done)
+    - VERSION=$(cat .latest)
+    - docker buildx build --push $TAGS --build-arg VERSION=$VERSION --platform linux/amd64 .
+
+trigger:
+  event:
+  - cron
+  cron:
+  - nightly
+---
+kind: signature
+hmac: e528ced745f213ab35f6608230f32509d2740019586ebb2fa0bcf7be8f0b7612
+
+...
