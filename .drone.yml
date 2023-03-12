@@ -13,7 +13,7 @@ steps:
     - echo -n "$LATEST" >> .latest
     - TAG=$LATEST
     - echo -n "latest,$TAG" > .tags
-    - while [ -z $${TAG##*\.*} ]; do echo -n "," >> ../.tags; TAG=$${TAG%*\.*}; echo -n $TAG >> ../.tags; done
+    - while [ -z $${TAG##*\.*} ]; do echo -n "," >> .tags; TAG=$${TAG%*\.*}; echo -n $TAG >> .tags; done
 
   - name: docker
     image: docker:dind
@@ -45,6 +45,6 @@ trigger:
   - nightly
 ---
 kind: signature
-hmac: e528ced745f213ab35f6608230f32509d2740019586ebb2fa0bcf7be8f0b7612
+hmac: 23c1e5c24e65df48a0a017b19f43814fb6a2e338751d6f7ece8950d9852ae619
 
 ...
