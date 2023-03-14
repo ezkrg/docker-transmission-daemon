@@ -9,7 +9,7 @@ steps:
     commands:
     - apk add --update --no-cache curl jq
     - LATEST=$(curl -sL "https://api.github.com/repos/transmission/transmission/releases" | jq -r ".[0].tag_name")
-    - if curl -sfL https://hub.docker.com/v2/repositories/ezkrg/transmission-daemon/tags/$LATEST > /dev/null; then echo "tag $TAG already exist"; exit 78; fi
+    - if curl -sfL https://hub.docker.com/v2/repositories/ezkrg/transmission-daemon/tags/$LATEST > /dev/null; then echo "tag $LATEST already exist"; exit 78; fi
     - echo -n "$LATEST" >> .latest
     - TAG=$LATEST
     - echo -n "latest,$TAG" > .tags
@@ -45,6 +45,6 @@ trigger:
   - nightly
 ---
 kind: signature
-hmac: 23c1e5c24e65df48a0a017b19f43814fb6a2e338751d6f7ece8950d9852ae619
+hmac: 2428b56fcedcff8c7a344ce2d55132cf856e309800b38ad66af4ca963f7792d1
 
 ...
